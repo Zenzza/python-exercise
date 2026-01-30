@@ -19,7 +19,7 @@ class DiffApp:
         header_frame = ctk.CTkFrame(root, corner_radius=0)
         header_frame.grid(row=0, column=0, sticky="ew", padx=0, pady=(0, 10))
         
-        header_label = ctk.CTkLabel(header_frame, text="QSAI Test 1", font=ctk.CTkFont(size=24, weight="bold"))
+        header_label = ctk.CTkLabel(header_frame, text="Pembanding Dokumen", font=ctk.CTkFont(size=24, weight="bold"))
         header_label.pack(pady=15)
         
         btn_frame = ctk.CTkFrame(root, fg_color="transparent")
@@ -31,43 +31,29 @@ class DiffApp:
         self.file_label = ctk.CTkLabel(root, text="Tidak ada dokumen yang di pilih.", text_color="gray")
         self.file_label.grid(row=3, column=0, pady=10)
 
-        table_frame = ctk.CTkFrame(root)
-        table_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
-        table_frame.grid_columnconfigure(0, weight=1)
-        table_frame.grid_rowconfigure(0, weight=1)
+        self.table_container = ctk.CTkFrame(root)
+        self.table_container.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
+        self.table_container.grid_columnconfigure(0, weight=1)
+        self.table_container.grid_rowconfigure(1, weight=1) 
 
-        columns = ("kategori", "doc_1", "doc_2", "beda")
-        self.tree = ttk.Treeview(table_frame, columns=columns, show='headings')
+        self.header_bg = ctk.CTkFrame(self.table_container, corner_radius=0, fg_color="#333333")
+        self.header_bg.grid(row=0, column=0, sticky="ew")
+        self.header_bg.grid_columnconfigure(0, weight=2) 
+        self.header_bg.grid_columnconfigure(1, weight=3) 
+        self.header_bg.grid_columnconfigure(2, weight=3) 
+        self.header_bg.grid_columnconfigure(3, weight=2) 
         
-        self.tree.heading("kategori", text="Kategori")
-        self.tree.heading("doc_1", text="Dokumen Pertama")
-        self.tree.heading("doc_2", text="Dokumen Kedua")
-        self.tree.heading("beda", text="Perbedaan")
-        
-        self.tree.column("kategori", width=150)
-        self.tree.column("doc_1", width=250)
-        self.tree.column("doc_2", width=250)
-        self.tree.column("beda", width=150)
-        
-        style = ttk.Style()
-        style.theme_use('clam')
-        style.configure("Treeview", 
-                        background="#2b2b2b", 
-                        foreground="white", 
-                        fieldbackground="#2b2b2b", 
-                        font=('Segoe UI', 20), 
-                        rowheight=80,
-                        borderwidth=0)
-        style.map('Treeview', background=[('selected', '#1f538d')])
-        
-        style.configure("Treeview.Heading", 
-                        background="#333333", 
-                        foreground="white", 
-                        font=('Segoe UI', 30, 'bold'),
-                        borderwidth=1,
-                        relief="flat")
-        
-        self.tree.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        headers = ["Kategori", "Dokumen Pertama", "Dokumen Kedua", "Perbedaan"]
+        for i, h in enumerate(headers):
+            lbl = ctk.CTkLabel(self.header_bg, text=h, font=("Segoe UI", 16, "bold"), text_color="white")
+            lbl.grid(row=0, column=i, padx=10, pady=10, sticky="ew")
+
+        self.table_content = ctk.CTkScrollableFrame(self.table_container, corner_radius=0, fg_color="transparent")
+        self.table_content.grid(row=1, column=0, sticky="nsew")
+        self.table_content.grid_columnconfigure(0, weight=2)
+        self.table_content.grid_columnconfigure(1, weight=3)
+        self.table_content.grid_columnconfigure(2, weight=3)
+        self.table_content.grid_columnconfigure(3, weight=2)
         
         self.parser = comparator.ContentParser()
         self.comparator = comparator.DocumentComparator()
@@ -92,7 +78,7 @@ class DiffApp:
         self.run_comparison(file_a, file_b)
 
     def run_comparison(self, path_a, path_b):
-        self.file_label.configure(text=f"Membandingkan: {os.path.basename(path_a)} vs {os.path.basename(path_b)}")
+        self.file_label.configure(text=f"Membandingkan: {os.path.basename(path_a)} dengan {os.path.basename(path_b)}")
         
         data_a = self.parser.parse_docx(path_a)
         data_b = self.parser.parse_docx(path_b)
@@ -103,8 +89,8 @@ class DiffApp:
 
         results = self.comparator.compare(data_a, data_b)
         
-        for row in self.tree.get_children():
-            self.tree.delete(row)
+        for widget in self.table_content.winfo_children():
+            widget.destroy()
             
         order = [
             "Line Spacing", 
@@ -114,11 +100,35 @@ class DiffApp:
             "Kesalahan Ketik"
         ]
         
+        row_idx = 0
         for criteria in order:
             res = results.get(criteria, {"A": "-", "B": "-", "Diff": "-"})
-            self.tree.insert("", tk.END, values=(criteria, res["A"], res["B"], res["Diff"]))
+            vals = [criteria, res["A"], res["B"], res["Diff"]]
+            
+            bg_color = "#2b2b2b" if row_idx % 2 == 0 else "#2b2b2b" 
+            
+            for col_idx, text in enumerate(vals):
+                w_len = 200
+                if col_idx == 1 or col_idx == 2: w_len = 250
+                
+                lbl = ctk.CTkLabel(
+                    self.table_content, 
+                    text=str(text), 
+                    font=("Segoe UI", 14), 
+                    text_color="white",
+                    wraplength=w_len,
+                    justify="left",
+                    anchor="w"
+                )
+                lbl.grid(row=row_idx, column=col_idx, sticky="ew", padx=5, pady=5)
+                
+            separator = ctk.CTkFrame(self.table_content, height=2, fg_color="#444444")
+            separator.grid(row=row_idx+1, column=0, columnspan=4, sticky="ew", pady=(5,0))
+
+            row_idx += 2 
 
 if __name__ == "__main__":
     root = ctk.CTk()
     app = DiffApp(root)
     root.mainloop()
+

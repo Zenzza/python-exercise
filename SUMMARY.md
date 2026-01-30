@@ -1,5 +1,14 @@
 # Summary
 
+## Notes
+
+Keterangan File :
+
+1. `main.py` adalah file utama atau entry point dari program ini.
+2. `gui.py` adalah file GUI untuk mengeluarkan output dari `comparator.py` GUI yang digunakan adalah CustomTkinter.
+3. `comparator.py` adalah file logic atau engine dari program ini.
+4. `requirements.txt` adalah file daftar dependensi yang dibutuhkan agar program berjalan dengan baik.
+
 ## Tech Stack
 
 Tech stack yang digunakan dalam program ini meliputi:
@@ -14,9 +23,7 @@ Tech stack yang digunakan dalam program ini meliputi:
 ## Challenges
 
 1. **Bagian Bullet dan Numbering** : Format di word pada bagian bullet dan numbering lumayan susah untuk didetect secara langsung pakai program karena Bullet dan Numbering itu ghost text kalau pakai automatic numbering. Walaupun cuma ada tag numPr di text tsb tapi itu hanya nunjukin urutan ke berapa bukan tipe apa yang digunakan
-
 2. **Kesalahan Ketik**: Membedakan typo dan kata yang benar namun mirip seperti Ramah dan Rumah. Program mengeluarkan output typo tapi sebenarny cuma beda arti. Namun jika dokumen A adalah dokumen yang benar dan Dokumen B adalah input peserta maka hal ini tidak menjadi masalah. Kembali ke sistem yang diinginkan
-
 3. **Line Spacing**: Jika peserta tidak mengatur spacing secara manual (ttp pakai bawaan sistem) program mengeluarkan output None. Hal ini membuat program error. contohnya kalau dokumen A itu outputnya 1.15 sedangkan dokumen B outputnya None (dalam hal ini mengeluarkan output "") akan error di difflib. Karena difflib ketat dengan tipe datanya (satu int satu lagi string).
 
 ## Solusi
@@ -28,4 +35,5 @@ Tech stack yang digunakan dalam program ini meliputi:
 ## Blockers
 
 1. **python-docx :** Hanya bisa mengambil format .docx . Tidak bisa mengambil format jadul seperti .doc, .dotx, .txt, dsb.
-2. Selebihnya tidak ada.
+2. **Bullet dan Numbering** : Sesuai dengan solusi no 1. Masih terdapat bias data yang diberikan oleh program namun untuk program ini hanya bisa untuk mendeteksi jenisnya bukan ke tipenya seperti 1. atau a). Masih belum menemukan solusi yang tepat.
+3. **Spacing Indentasi** : Program ini belum dapat mengecek spacing yang menjorok ke dalam dan keluar hanya bisa mengscan secara general dari margin dan kalimat awal. Sudah beberapa cara di lakukan namun belum ketemu solusi yang tepat.
